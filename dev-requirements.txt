@@ -72,7 +72,7 @@ jedi==0.18.1
     # via ipython
 jupyter-client==7.1.1
     # via ipykernel
-jupyter-core==4.9.1
+jupyter-core==4.11.2
     # via jupyter-client
 lazy-object-proxy==1.7.1
     # via astroid
