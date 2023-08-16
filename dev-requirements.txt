@@ -20,7 +20,7 @@ black==21.12b0
     # via
     #   -r dev-requirements.in
     #   ipython
-certifi==2021.10.8
+certifi==2023.7.22
     # via requests
 cfgv==3.3.1
     # via pre-commit
