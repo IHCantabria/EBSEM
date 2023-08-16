@@ -172,7 +172,7 @@ tomli==1.2.3
     #   pep517
 tomli-w==1.0.0
     # via flit
-tornado==6.1
+tornado==6.3.3
     # via
     #   ipykernel
     #   jupyter-client
