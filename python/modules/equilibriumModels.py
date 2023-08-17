@@ -131,12 +131,12 @@ def shorefor(settings, params):
 def Objective(model, settings, params, MetObj, ENS):
     if model == "Y09":
         # Y = yates09(settings, np.exp(params))
-        Y = yates09_jit(settings.Y09["E"], settings.Y09["S0"], settings.Y09["dt"], params)
+        Y = yates09_jit(settings.Y09["E"], settings.Y09["S0"], settings.Y09["dt"], np.exp(params))
     elif model == "MD":
         # Y = millerDean04(settings, np.exp(params))
         Y = millerDean04_jit(settings.Hb, settings.MD["sl"], settings.depthb, settings.Omega, 
                              settings.MD["flagP"], settings.Wast, settings.MD["Hberm"], settings.MD["dt"],
-                             settings.MD["Yi"], params)
+                             settings.MD["Yi"], np.exp(params))
     elif model == "SF":
         Y = shorefor(settings, np.exp(params))
         # Y = shorefor_jit(settings.Omega, settings.SF["P"], settings.SF["dt"], params)
@@ -144,18 +144,15 @@ def Objective(model, settings, params, MetObj, ENS):
     YYsl = Y[ENS["indexes"]]
 
     if MetObj == "Pearson":
-        metVal = 1 - np.abs(np.sum((YYsl - np.mean(YYsl)) * (ENS["Yobs"] - np.mean(ENS["Yobs"]))) / 
-                          (np.sqrt(np.sum((YYsl - np.mean(YYsl))**2) * np.sum((ENS["Yobs"] - np.mean(ENS["Yobs"]))**2))))
+        return 1 - np.abs(np.sum((YYsl - np.mean(YYsl)) * (ENS["Yobs"] - np.mean(ENS["Yobs"]))) / 
+                          (np.sqrt(np.sum(np.square((YYsl - np.mean(YYsl)))) * np.sum(np.square(ENS["Yobs"] - np.mean(ENS["Yobs"]))))))
     elif MetObj == "RMSE":
-        metVal = np.sqrt(np.mean((YYsl - ENS["Yobs"])**2))
+        return np.sqrt(np.mean(np.square(YYsl - ENS["Yobs"])))
     elif MetObj == "MSS":
-        metVal = np.sum((YYsl - ENS["Yobs"])**2) / len(YYsl) / (np.var(YYsl) + np.var(ENS["Yobs"]) + (np.mean(YYsl) - np.mean(ENS["Yobs"]))**2)
+        return np.sum((YYsl - ENS["Yobs"])**2) / len(YYsl) / (np.var(YYsl) + np.var(ENS["Yobs"]) + np.square(np.mean(YYsl) - np.mean(ENS["Yobs"])))
     elif MetObj == "BSS":
         YYref = np.mean(YYsl)  # You need to define YYref here based on your requirements
-        metVal = (np.mean((YYsl - ENS["Yobs"])**2) - np.mean((YYref - ENS["Yobs"])**2)) / np.mean((YYref - ENS["Yobs"])**2)
-    
-    return metVal
-
+        return (np.mean(np.square(YYsl - ENS["Yobs"])) - np.mean(np.square(YYref - ENS["Yobs"]))) / np.mean((YYref - ENS["Yobs"])**2)
 
 ################################################
 ################################################
@@ -210,7 +207,7 @@ def millerDean04_jit(Hb, sl, depthb, Omega, flagP, Wast, Hberm, dt, Yi, params):
         kero[:] = cero * Omega
         kacr[:] = cacr * Omega
     
-    Y = np.full(len(Hb), np.nan)
+    Y = np.zeros_like(Hb)
     wl = 0.106 * Hb + sl
     yeq = DY0 - Wast * wl / (Hberm + depthb)
     Y[0] = Yi

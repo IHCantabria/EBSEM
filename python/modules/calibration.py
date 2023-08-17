@@ -13,11 +13,11 @@ def sce_ua2(f, x0, ngen, npop, npar, mag, lb, ub):
     for gen in range(1, ngen+1):
 
         # Evaluate the function for all individuals in the population
-        # func = np.vectorize(lambda i: f(pop[i,:]))
-        # fvals = func(np.arange(0,npop),)
-        for i in range(npop):
-            fvals[i] = f(pop[i, :])
-
+        func = np.vectorize(lambda i: f(pop[i,:]))
+        fvals = func(np.arange(0,npop),)
+        # for i in range(npop):
+        #     fvals[i] = f(pop[i, :])
+        
         # Shuffle the population
         indices = np.random.permutation(npop)
         pop = pop[indices, :]
@@ -46,6 +46,7 @@ def sce_ua2(f, x0, ngen, npop, npar, mag, lb, ub):
         if gen % int(ngen / 20) == 0:
             print(f'Progress = {100 * gen / ngen:.2f} %')
             print(f'Generation: {gen} / {ngen}')
+            print(f'Metric Value: {np.min(fvals):.2f}')
         # Check convergence
         if gen > 5:
             if np.all(np.abs(fvals[0] - fvals) < 1e-4):
